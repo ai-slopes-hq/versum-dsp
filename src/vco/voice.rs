@@ -51,6 +51,7 @@ pub struct Shape {
 }
 
 impl Shape {
+    #[inline]
     pub fn new(pw: f64, sub2: bool) -> Self {
         Self { a: 0.5 * (1.0 + DELTA), t: (1.0 - 2.0 * pw).clamp(-0.9, 0.9), sub2 }
     }
@@ -180,10 +181,12 @@ fn first_crossing(a: f64, b: f64, c: f64, rem: f64) -> Option<f64> {
 }
 
 impl Voice {
+    #[inline]
     pub fn new(phase: f64) -> Self {
         Self { p: phase, d: 1.0, last: f64::NAN, last_t: f64::NAN, sub: [-1.0; 2] }
     }
 
+    #[inline]
     pub fn values(&self, s: &Shape) -> [f64; OUTS] {
         values_at(self.p, self.sub, s)
     }
@@ -195,6 +198,7 @@ impl Voice {
     /// `sync` is an edge of the sync input at the fractional time `τ` of this sample: Hard restarts the phase at 0
     /// going up with both sub triggers at −1, Reverse flips the direction. It is an event like the others, with
     /// jumps taken from both sides of it.
+    #[inline]
     pub fn advance(
         &mut self,
         inc: f64,

@@ -27,6 +27,7 @@ impl Smooth {
         self.newest = 0;
     }
 
+    #[inline]
     fn push(&mut self, x: f64) {
         self.newest = (self.newest + 1) % TAPS;
         for i in [self.newest, self.newest + TAPS] {
@@ -37,6 +38,7 @@ impl Smooth {
     }
 
     /// `Σ KERNEL[m]·x[newest − m]`
+    #[inline]
     fn fir(&self) -> f64 {
         // four independent sums, so the loop is not one long chain of dependent additions
         self.buf.get(self.newest + 1..self.newest + 1 + TAPS).map_or(0.0, |w| {

@@ -35,6 +35,7 @@ impl Residuals {
     }
 
     /// Value jump `dv` that happened `ago ∈ [0, 1)` samples before the current output sample.
+    #[inline]
     pub fn step(&mut self, ago: f64, dv: f64) {
         if dv.abs() < NEGLIGIBLE {
             return;
@@ -49,6 +50,7 @@ impl Residuals {
     }
 
     /// Slope change `ds` (per sample) that happened `ago ∈ [0, 1)` samples before the current output sample.
+    #[inline]
     pub fn ramp(&mut self, ago: f64, ds: f64) {
         if ds.abs() < NEGLIGIBLE {
             return;
@@ -58,6 +60,7 @@ impl Residuals {
 
     /// Jumps `d` of value, slope, curvature and its rate (per sample⁰…³) that happened `ago` before the current
     /// output sample, on a wave whose naive samples go through the FIR `KERNEL` instead of the delay.
+    #[inline]
     pub fn fir_jumps(&mut self, ago: f64, d: [f64; 4]) {
         let [d0, d1, d2, d3] = d;
         if d0.abs() >= NEGLIGIBLE {
@@ -77,17 +80,20 @@ impl Residuals {
     }
 
     /// Residual of the current sample; clears its cell and advances the ring.
+    #[inline]
     pub fn next(&mut self) -> f32 {
         let cell = self.ring.get_mut(self.head).map(std::mem::take).unwrap_or(0.0);
         self.head = (self.head + 1) % TAPS;
         cell
     }
 
+    #[inline]
     pub fn clear(&mut self) {
         self.ring = [0.0; TAPS];
         self.head = 0;
     }
 
+    #[inline]
     fn add(&mut self, table: &[f32], ago: f64, amp: f64) {
         let ago = if ago.is_finite() { ago.clamp(0.0, 0.999_999) } else { 0.0 };
         // tap `k` reads the table at `(k + ago)·PHASES`: the same fraction `f` of every `PHASES`-th pair
