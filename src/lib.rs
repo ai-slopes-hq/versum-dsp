@@ -1,5 +1,6 @@
 //! versum-dsp: small DSP building blocks. Audio is f32, phases and accumulators are f64.
 
+pub mod blep;
 pub mod block;
 pub mod dc;
 pub mod delay;
@@ -9,6 +10,8 @@ pub mod onepole;
 pub mod pan;
 pub mod ramp;
 pub mod rng;
+#[cfg(test)]
+mod measure;
 #[cfg(feature = "testkit")]
 pub mod testkit;
 
