@@ -229,3 +229,16 @@ fn reset_clears_state() {
         assert_eq!(s.tick(*v).to_bits(), fresh.tick(*v).to_bits());
     }
 }
+
+#[test]
+fn full_scale_saw_through_fold_stays_bounded() {
+    let t = fold();
+    let mut s = Shaper::<2049>::new(&t);
+    let mut y: Vec<f32> = (0..48000)
+        .map(|i| (((i as f64 * 110.0 / SR) % 1.0) * 2.0 - 1.0) as f32)
+        .collect();
+    s.process(&mut y);
+    // Chromium's downsampler can overshoot slightly (measured 1.064 on a 110 Hz saw, more than the 1.02 first expected); the block intentionally does not clamp.
+    let m = y.iter().fold(0.0f32, |a, v| a.max(v.abs()));
+    assert!(y.iter().all(|v| v.is_finite()) && m <= 1.1, "max {m}");
+}

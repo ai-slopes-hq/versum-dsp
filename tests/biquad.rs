@@ -10,7 +10,9 @@ static A: CountingAlloc = CountingAlloc;
 const SR: f64 = 48000.0;
 
 fn sine(hz: f64, n: usize) -> Vec<f32> {
-    (0..n).map(|i| (TAU * hz * i as f64 / SR).sin() as f32).collect()
+    (0..n)
+        .map(|i| (TAU * hz * i as f64 / SR).sin() as f32)
+        .collect()
 }
 
 /// Hann-windowed single-bin DFT; a sine of peak `a` reads `a`.
@@ -65,6 +67,30 @@ fn highpass_22hz_blocks_dc() {
     let mut x = sine(1000.0, 48000);
     b.process(&mut x);
     assert!(x.iter().all(|v| v.abs() <= 1.023));
+    // The 1.023 bound is the start-up transient (the filter is cold); once settled the peak is unity.
+    assert!(x[24000..].iter().all(|v| v.abs() <= 1.001));
+}
+
+#[test]
+fn lowpass_100hz_steady_state_peak_is_unity() {
+    let mut b = Biquad::new(SR);
+    // Butterworth Q (-3.01 dB): maximally flat. At Q = 0 dB the response at 100 Hz is ~+0.04 dB (1.005), over the bound.
+    b.set(BiquadKind::Lowpass, 1000.0, -3.0103);
+    let mut x = sine(100.0, 48000);
+    b.process(&mut x);
+    assert!(x[24000..].iter().all(|v| v.abs() <= 1.001));
+}
+
+#[test]
+fn extreme_q_db_stays_finite() {
+    for q in [-4000.0, 4000.0, -1e300, 1e300] {
+        let mut b = Biquad::new(SR);
+        b.set(BiquadKind::Lowpass, 1000.0, q);
+        let mut x = sine(300.0, 4800);
+        b.process(&mut x);
+        assert!(x.iter().all(|v| v.is_finite()), "q {q}");
+        assert!(x.iter().any(|v| v.abs() > 1e-6), "q {q}: silent");
+    }
 }
 
 #[test]
@@ -76,7 +102,11 @@ fn set_keeps_state_and_stays_finite() {
         if i % 64 == 0 {
             let f = 20.0 + r.next_f64() * (18000.0 - 20.0);
             let q = -20.0 + r.next_f64() * 44.0;
-            let kind = if r.next_f64() < 0.5 { BiquadKind::Lowpass } else { BiquadKind::Highpass };
+            let kind = if r.next_f64() < 0.5 {
+                BiquadKind::Lowpass
+            } else {
+                BiquadKind::Highpass
+            };
             b.set(kind, f, q);
         }
         let y = b.tick(*v);

@@ -27,9 +27,6 @@ fn triangle_shape() {
             assert!(v > prev, "rising at {i}");
             assert!((v as f64 - 4.0 * i as f64 / SR).abs() < 1e-5);
         }
-        if i == 11999 {
-            // value() after 12000 ticks is checked below
-        }
         prev = v;
     }
     let mut a = Lfo::new(LfoShape::Triangle, 1.0, 0.0, SR);

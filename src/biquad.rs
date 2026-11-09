@@ -26,7 +26,18 @@ pub struct Biquad {
 impl Biquad {
     /// Starts as a pass-through.
     pub fn new(sr: f64) -> Biquad {
-        Biquad { sr, b0: 1.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0, x1: 0.0, x2: 0.0, y1: 0.0, y2: 0.0 }
+        Biquad {
+            sr,
+            b0: 1.0,
+            b1: 0.0,
+            b2: 0.0,
+            a1: 0.0,
+            a2: 0.0,
+            x1: 0.0,
+            x2: 0.0,
+            y1: 0.0,
+            y2: 0.0,
+        }
     }
 
     /// Recomputes coefficients; filter state is kept. Costly (trig, pow): call once per block, not per sample.
@@ -36,6 +47,8 @@ impl Biquad {
             return;
         }
         let f = freq_hz.clamp(1.0, self.sr * 0.49);
+        // Keeps 10^(q/20) finite and nonzero, so alpha never underflows or overflows.
+        let q_db = q_db.clamp(-60.0, 60.0);
         let omega = std::f64::consts::TAU * f / self.sr;
         let (sin, cos) = omega.sin_cos();
         let alpha = sin / (2.0 * 10f64.powf(q_db / 20.0));
@@ -55,7 +68,9 @@ impl Biquad {
 impl Block for Biquad {
     fn tick(&mut self, x: f32) -> f32 {
         let xi = x as f64;
-        let y = self.b0 * xi + self.b1 * self.x1 + self.b2 * self.x2 - self.a1 * self.y1 - self.a2 * self.y2;
+        let y = self.b0 * xi + self.b1 * self.x1 + self.b2 * self.x2
+            - self.a1 * self.y1
+            - self.a2 * self.y2;
         let out = y as f32;
         if !xi.is_finite() || !out.is_finite() {
             self.reset();

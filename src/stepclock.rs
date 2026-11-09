@@ -16,6 +16,8 @@ pub struct StepClock {
 impl StepClock {
     /// First step is due immediately.
     pub fn new(sr: f64, bpm: f64) -> StepClock {
+        // A non-finite or non-positive rate would give a zero/NaN period and hang `while next_in() <= 0`.
+        let sr = if sr.is_finite() && sr > 0.0 { sr } else { 1.0 };
         let mut c = StepClock {
             sr,
             bpm: 120.0,
