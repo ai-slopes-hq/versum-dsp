@@ -5,3 +5,10 @@ edition = "2021"
 
 [features]
 testkit = []
+gen = ["dep:rustfft"]
+
+[dependencies]
+rustfft = { version = "6", optional = true }
+
+[dev-dependencies]
+rustfft = "6"
