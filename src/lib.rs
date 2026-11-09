@@ -12,6 +12,7 @@ pub mod onepole;
 pub mod pan;
 pub mod ramp;
 pub mod rng;
+pub mod shaper;
 pub mod vco;
 #[cfg(test)]
 mod measure;
