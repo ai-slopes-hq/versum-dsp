@@ -14,7 +14,7 @@
 
 pub const SINE: usize = 0;
 pub const TRI: usize = 1;
-#[allow(dead_code)] // output indices, named for the unison mixer
+
 pub const SAW: usize = 2;
 #[allow(dead_code)]
 pub const PULSE: usize = 3;

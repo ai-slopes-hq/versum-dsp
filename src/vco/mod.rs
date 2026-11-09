@@ -2,7 +2,7 @@ mod voice;
 
 use crate::blep::{Residuals, DELAY, KERNEL, TAPS};
 use voice::{sine_kink, Shape, SyncMode, Voice};
-pub use voice::{OUTS, SINE, TRI};
+pub use voice::{OUTS, PULSE, SAW, SINE, SUB, TRI};
 
 const _: () = assert!(KERNEL.len() == TAPS);
 
