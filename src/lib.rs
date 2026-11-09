@@ -7,6 +7,7 @@ pub mod dc;
 pub mod delay;
 pub mod edge;
 pub mod knee;
+pub mod lfo;
 pub mod lpg;
 pub mod onepole;
 pub mod pan;
