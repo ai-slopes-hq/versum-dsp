@@ -14,7 +14,18 @@ impl Ramp {
         Ramp { steps, cur: 0.0, target: 0.0, step: 0.0, left: 0 }
     }
 
+    pub fn reset(&mut self) {
+        self.cur = 0.0;
+        self.target = 0.0;
+        self.step = 0.0;
+        self.left = 0;
+    }
+
+    /// A non-finite target is ignored.
     pub fn set_target(&mut self, v: f32) {
+        if !v.is_finite() {
+            return;
+        }
         self.target = v as f64;
         self.left = self.steps;
         self.step = (self.target - self.cur) / self.steps as f64;
@@ -28,6 +39,9 @@ impl Ramp {
             } else {
                 self.cur += self.step;
             }
+        }
+        if !self.cur.is_finite() {
+            self.reset();
         }
         self.cur as f32
     }

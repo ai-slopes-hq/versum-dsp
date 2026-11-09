@@ -26,6 +26,7 @@ impl Block for Knee {
         if out.is_finite() {
             out
         } else {
+            self.reset();
             0.0
         }
     }

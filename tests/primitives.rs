@@ -146,8 +146,26 @@ fn outputs_are_finite_on_nan_input() {
     finite_after_bad(OnePole::new(800.0, 48000.0));
     finite_after_bad(Knee::new(2.0, 0.9, 0.1));
     let mut d = Delay::new(8);
-    d.write_read(f32::NAN, 2.0);
-    for _ in 0..100 {
-        assert!(d.write_read(0.1, 2.0).is_finite());
+    for bad in [f32::NAN, f32::INFINITY] {
+        d.write_read(bad, 2.0);
+        for _ in 0..100 {
+            assert!(d.write_read(0.1, 2.0).is_finite());
+        }
     }
+}
+
+#[test]
+fn ramp_survives_non_finite_target() {
+    let mut r = Ramp::new(48000.0, 10.0);
+    for bad in [f32::NAN, f32::INFINITY] {
+        r.set_target(bad);
+        for _ in 0..100 {
+            assert!(r.next().is_finite());
+        }
+    }
+    r.set_target(1.0);
+    for _ in 0..480 {
+        r.next();
+    }
+    assert_eq!(r.value(), 1.0);
 }
