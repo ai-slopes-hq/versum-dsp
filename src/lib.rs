@@ -1,5 +1,6 @@
 //! versum-dsp: small DSP building blocks. Audio is f32, phases and accumulators are f64.
 
+pub mod biquad;
 pub mod blep;
 pub mod block;
 pub mod dc;
