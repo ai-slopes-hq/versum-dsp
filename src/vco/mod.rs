@@ -299,4 +299,30 @@ mod tests {
         // a gate high from the first sample never produces an edge: same output as no sync at all
         assert_eq!(free(1.0), free(0.0));
     }
+
+    /// The doubled ring against a plain `Σ KERNEL[m]·x[newest − m]` over the history, over every position of the
+    /// newest sample and signals of every size.
+    #[test]
+    fn doubled_ring_fir_matches_the_plain_sum() {
+        let mut state = 0x9E37_79B9_7F4A_7C15u64;
+        let mut next = move || {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            (state >> 11) as f64 / (1u64 << 53) as f64
+        };
+        let mut ring = Smooth::new();
+        let start = next() - 0.5;
+        ring.fill(start);
+        let mut history = vec![start; TAPS];
+        for i in 0..5000 {
+            let x = (next() - 0.5) * if i % 7 == 0 { 100.0 } else { 2.0 };
+            ring.push(x);
+            history.push(x);
+            let newest = history.len() - 1;
+            let plain: f64 = KERNEL.iter().enumerate().map(|(m, h)| h * history[newest - m]).sum();
+            let got = ring.fir();
+            assert!((got - plain).abs() < 1e-12 * (1.0 + plain.abs()), "sample {i}: {got} vs {plain}");
+        }
+    }
 }
