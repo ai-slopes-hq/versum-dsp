@@ -11,6 +11,7 @@ pub mod onepole;
 pub mod pan;
 pub mod ramp;
 pub mod rng;
+pub mod vco;
 #[cfg(test)]
 mod measure;
 #[cfg(feature = "testkit")]
