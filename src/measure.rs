@@ -69,3 +69,11 @@ pub fn alias_db(s: &[f32], f0: f64, sr: f64) -> f64 {
     }
     10.0 * (p_a.max(1e-40) / p_h.max(1e-40)).log10()
 }
+
+/// 20·log10, floored so silence reads −400 dB rather than −inf. NaN stays NaN: it must not look like silence.
+pub fn db(x: f64) -> f64 {
+    if x.is_nan() {
+        return f64::NAN;
+    }
+    20.0 * x.max(1e-20).log10()
+}
